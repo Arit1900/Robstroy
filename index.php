@@ -38,9 +38,6 @@ $textMessageBuilder = new TextMessageBuilder($respMessage);
 $response = $bot->replyMessage($replyToken, $textMessageBuilder);
 break;
 
-namespace LINE\LINEBot\KitchenSink\EventHandler\MessageHandler;
-
-use Predis\Client;
 
 class TextMessageHandler implements EventHandler
 {

@@ -7,7 +7,82 @@ use \LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 $channel_token =
 '1caj07yURrrjtw3H9hzJ+bWYo+rsam3iGzbrYrrRhjH7zZqHuz3Dujm0jtJsVTThFpev/g0oK8CZYAON18xdMenFO+a02ALh4r2OlXPFyPsBscfr7b4IZwNoBOVLfS6RUA70p2pIWk3dpq+U8aHwtQdB04t89/1O/w1cDnyilFU=';
 $channel_secret = '5e8d1f791608a58b43c5bd31c986d955';
-// Get message from Line API
+
+$strAccessToken = "<Channel Access Token Line>";
+ 
+$content = file_get_contents('php://input');
+$arrJson = json_decode($content, true);
+ 
+$strUrl = "https://api.line.me/v2/bot/message/reply";
+ 
+$arrHeader = array();
+$arrHeader[] = "Content-Type: application/json";
+$arrHeader[] = "Authorization: Bearer {$strAccessToken}";
+$_msg = $arrJson['events'][0]['message']['text'];
+ 
+ 
+$api_key="<MLAB APIKEY>";
+$url = 'https://api.mlab.com/api/1/databases/duckduck/collections/linebot?apiKey='.$api_key.'';
+$json = file_get_contents('https://api.mlab.com/api/1/databases/duckduck/collections/linebot?apiKey='.$api_key.'&q={"question":"'.$_msg.'"}');
+$data = json_decode($json);
+$isData=sizeof($data);
+ 
+if (strpos($_msg, 'สอนเป็ด') !== false) {
+  if (strpos($_msg, 'สอนเป็ด') !== false) {
+    $x_tra = str_replace("สอนเป็ด","", $_msg);
+    $pieces = explode("|", $x_tra);
+    $_question=str_replace("[","",$pieces[0]);
+    $_answer=str_replace("]","",$pieces[1]);
+    //Post New Data
+    $newData = json_encode(
+      array(
+        'question' => $_question,
+        'answer'=> $_answer
+      )
+    );
+    $opts = array(
+      'http' => array(
+          'method' => "POST",
+          'header' => "Content-type: application/json",
+          'content' => $newData
+       )
+    );
+    $context = stream_context_create($opts);
+    $returnValue = file_get_contents($url,false,$context);
+    $arrPostData = array();
+    $arrPostData['replyToken'] = $arrJson['events'][0]['replyToken'];
+    $arrPostData['messages'][0]['type'] = "text";
+    $arrPostData['messages'][0]['text'] = 'ขอบคุณที่สอนเป็ด';
+  }
+}else{
+  if($isData >0){
+   foreach($data as $rec){
+    $arrPostData = array();
+    $arrPostData['replyToken'] = $arrJson['events'][0]['replyToken'];
+    $arrPostData['messages'][0]['type'] = "text";
+    $arrPostData['messages'][0]['text'] = $rec->answer;
+   }
+  }else{
+    $arrPostData = array();
+    $arrPostData['replyToken'] = $arrJson['events'][0]['replyToken'];
+    $arrPostData['messages'][0]['type'] = "text";
+    $arrPostData['messages'][0]['text'] = 'ก๊าบบ คุณสามารถสอนให้ฉลาดได้เพียงพิมพ์: สอนเป็ด[คำถาม|คำตอบ]';
+  }
+}
+ 
+ 
+$channel = curl_init();
+curl_setopt($channel, CURLOPT_URL,$strUrl);
+curl_setopt($channel, CURLOPT_HEADER, false);
+curl_setopt($channel, CURLOPT_POST, true);
+curl_setopt($channel, CURLOPT_HTTPHEADER, $arrHeader);
+curl_setopt($channel, CURLOPT_POSTFIELDS, json_encode($arrPostData));
+curl_setopt($channel, CURLOPT_RETURNTRANSFER,true);
+curl_setopt($channel, CURLOPT_SSL_VERIFYPEER, false);
+$result = curl_exec($channel);
+curl_close ($channel);
+
+/*// Get message from Line API
 $content = file_get_contents('php://input');
 $events = json_decode($content, true);
 if (!is_null($events['events'])) {
@@ -41,80 +116,4 @@ break;
 }
 }
 }
-
-public function __construct ($channelSecret, $access_token) {
-		
-        $this->httpClient     = new CurlHTTPClient($access_token);
-        $this->channelSecret  = $channelSecret;
-        $this->endpointBase   = LINEBot::DEFAULT_ENDPOINT_BASE;
-		
-        $this->content        = file_get_contents('php://input');
-        $events               = json_decode($this->content, true);
-		
-        if (!empty($events['events'])) {
-			
-            $this->isEvents = true;
-            $this->events   = $events['events'];
-			
-            foreach ($events['events'] as $event) {
-				
-                $this->replyToken = $event['replyToken'];
-                $this->source     = (object) $event['source'];
-                $this->message    = (object) $event['message'];
-                $this->timestamp  = $event['timestamp'];
-				
-                if ($event['type'] == 'message' && $event['message']['type'] == 'text') {
-                    $this->isText = true;
-                    $this->text   = $event['message']['text'];
-                }
-				
-                if ($event['type'] == 'message' && $event['message']['type'] == 'image') {
-                    $this->isImage = true;
-                }
-				
-                if ($event['type'] == 'message' && $event['message']['type'] == 'sticker') {
-                    $this->isSticker = true;
-                }
-				
-            }
-        }
-		
-        parent::__construct($this->httpClient, [ 'channelSecret' => $channelSecret ]);
-		
-    }
-	
-    public function sendMessageNew ($to = null, $message = null) {
-        $messageBuilder = new TextMessageBuilder($message);
-        $this->response = $this->httpClient->post($this->endpointBase . '/v2/bot/message/push', [
-            'to' => $to,
-            // 'toChannel' => 'Channel ID,
-            'messages'  => $messageBuilder->buildMessage()
-        ]);
-    }
-	
-    public function replyMessageNew ($replyToken = null, $message = null) {
-        $messageBuilder = new TextMessageBuilder($message);
-        $this->response = $this->httpClient->post($this->endpointBase . '/v2/bot/message/reply', [
-            'replyToken' => $replyToken,
-            'messages'   => $messageBuilder->buildMessage(),
-        ]);
-    }
-	
-    public function isSuccess () {
-        return !empty($this->response->isSucceeded()) ? true : false;
-    }
-	
-    public static function verify ($access_token) {
-		
-        $ch = curl_init('https://api.line.me/v1/oauth/verify');
-		
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [ 'Authorization: Bearer ' . $access_token ]);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return json_decode($result);
-		
-    }
-
 echo "OK";

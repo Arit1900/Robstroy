@@ -43,6 +43,9 @@ foreach ($events as $event) {
   }
 }  
 
+$outputText = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder("text message");
+$bot->replyMessage($event->getReplyToken(), $outputText);
+
 /*// Get message from Line API
 $content = file_get_contents('php://input');
 $events = json_decode($content, true);

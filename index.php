@@ -42,7 +42,7 @@ break;
 
 $signature = $_SERVER['HTTP_' . \LINE\LINEBot\Constant\HTTPHeader::LINE_SIGNATURE];
 try {
-$events = $bot->parseEventRequest(file_get_contents('php://input'), $signature);
+  $events = $bot->parseEventRequest(file_get_contents('php://input'), $signature);
 } catch(\LINE\LINEBot\Exception\InvalidSignatureException $e) {
   error_log('parseEventRequest failed. InvalidSignatureException => '.var_export($e, true));
 } catch(\LINE\LINEBot\Exception\UnknownEventTypeException $e) {
@@ -52,14 +52,6 @@ $events = $bot->parseEventRequest(file_get_contents('php://input'), $signature);
 } catch(\LINE\LINEBot\Exception\InvalidEventRequestException $e) {
   error_log('parseEventRequest failed. InvalidEventRequestException => '.var_export($e, true));
 }
-foreach ($events as $event) {
-  // Postback Event
-  if (($event instanceof \LINE\LINEBot\Event\PostbackEvent)) {
-    $logger->info('Postback message has come');
-    continue;
-  }
-
-
 foreach ($events as $event) {
   // Postback Event
   if (($event instanceof \LINE\LINEBot\Event\PostbackEvent)) {
@@ -78,6 +70,7 @@ foreach ($events as $event) {
     $messageText=strtolower(trim($event->getText()));
     
   }
+}  
 
 
   

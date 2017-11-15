@@ -75,7 +75,5 @@ foreach ($events as $event) {
 
 
 
-}
-}
-}
+
 echo "OK";

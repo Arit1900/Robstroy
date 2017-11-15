@@ -19,26 +19,14 @@ switch($event['message']['type']) {
 case 'text':
 // Get replyToken
 $replyToken = $event['replyToken'];
-switch($event['message']['type']) {
-case 'image':
-$messageID = $event['message']['id'];
-$respMessage = 'Hello, your image ID is '. $messageID;
-break;
-default:
-}
-$httpClient = new CurlHTTPClient($channel_token);
-$bot = new LINEBot($httpClient, array('channelSecret' => $channel_secret));
-$textMessageBuilder = new TextMessageBuilder($respMessage);
-$response = $bot->replyMessage($replyToken, $textMessageBuilder);
 // Reply message
-//$respMessage = 'Hello, your message is '. $event['message']['text'];
+$respMessage = 'Hello, your message is '. $event['message']['text'];
 $httpClient = new CurlHTTPClient($channel_token);
 $bot = new LINEBot($httpClient, array('channelSecret' => $channel_secret));
 $textMessageBuilder = new TextMessageBuilder($respMessage);
 $response = $bot->replyMessage($replyToken, $textMessageBuilder);
 break;
-
-
+}
 }
 }
 }

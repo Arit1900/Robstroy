@@ -9,7 +9,7 @@ $channel_token =
 $channel_secret = '5e8d1f791608a58b43c5bd31c986d955';
 // Get message from Line API
 $content = file_get_contents('php://input');
-$events = json_decode($content, true);
+/*$events = json_decode($content, true);
 if (!is_null($events['events'])) {
 // Loop through each event
 foreach ($events['events'] as $event) {
@@ -37,7 +37,7 @@ $bot = new LINEBot($httpClient, array('channelSecret' => $channel_secret));
 $textMessageBuilder = new TextMessageBuilder($respMessage);
 $response = $bot->replyMessage($replyToken, $textMessageBuilder);
 break;
-
+*/
 
 class TextMessageHandler implements EventHandler
 {
